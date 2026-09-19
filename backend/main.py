@@ -1,5 +1,5 @@
 """
-main.py — The entry point of the AstraShield backend.
+main.py — The entry point of the DeepShield backend.
 
 This file creates the FastAPI app and registers all the API routes.
 Think of it as the "front door" of your backend server.
@@ -24,7 +24,7 @@ from api.auth import router as auth_router
 # ── Create the FastAPI application ────────────────────────────────────────────
 # FastAPI automatically creates interactive API docs at /docs
 app = FastAPI(
-    title="AstraShield API",
+    title="DeepShield API",
     description="AI-Powered Deepfake & Identity Fraud Detection",
     version="1.0.0",
     docs_url="/docs",      # Visit http://localhost:8000/docs to see all endpoints
@@ -70,7 +70,7 @@ async def root():
     """Health check — visit http://localhost:8000 to confirm the server is running."""
     return {
         "status": "online",
-        "message": "AstraShield API is running",
+        "message": "DeepShield API is running",
         "docs": "/docs"
     }
 

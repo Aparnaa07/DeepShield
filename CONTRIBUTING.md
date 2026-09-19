@@ -1,4 +1,4 @@
-# Contributing to AstraShield
+# Contributing to DeepShield
 
 Thank you for your interest in contributing!
 

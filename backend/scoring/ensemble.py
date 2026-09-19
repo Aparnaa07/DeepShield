@@ -1,7 +1,7 @@
 """
 scoring/ensemble.py — The Fraud Risk Scoring Engine.
 
-This is the "judge" of AstraShield. It takes scores from all the
+This is the "judge" of DeepShield. It takes scores from all the
 detection modules and combines them into one final Fraud Risk Score (0-100).
 
 How it works:

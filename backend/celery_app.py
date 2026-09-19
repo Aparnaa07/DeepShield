@@ -22,7 +22,7 @@ load_dotenv()
 # - broker: Redis acts as the message queue (jobs waiting to be processed)
 # - backend: Redis also stores the results of completed jobs
 celery_app = Celery(
-    "astrashield",
+    "deepshield",
     broker=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
     backend=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
     include=[

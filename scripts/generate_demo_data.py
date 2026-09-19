@@ -17,7 +17,7 @@ import os
 load_dotenv()
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
-MONGO_DB  = os.getenv("MONGO_DB",  "astrashield")
+MONGO_DB  = os.getenv("MONGO_DB",  "deepshield")
 
 # Realistic fake filenames for demo
 IMAGE_NAMES    = ["face_photo.jpg", "profile_pic.png", "id_scan.jpg", "passport.png", "headshot.webp"]

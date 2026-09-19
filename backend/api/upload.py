@@ -62,7 +62,7 @@ async def upload_file(
     media_type = ALLOWED_TYPES[detected_mime]
 
     # Generate job ID
-    job_id = f"astra_{str(uuid.uuid4())[:8]}"
+    job_id = f"ds_{str(uuid.uuid4())[:8]}"
 
     # Save file locally
     os.makedirs(f"uploads/{job_id}", exist_ok=True)

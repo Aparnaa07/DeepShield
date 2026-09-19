@@ -28,7 +28,7 @@ def check(name: str, cmd: list, version_flag="--version") -> bool:
 
 def main():
     print("=" * 60)
-    print("  AstraShield — Local Development Setup Check")
+    print("  DeepShield — Local Development Setup Check")
     print("=" * 60)
     print()
 

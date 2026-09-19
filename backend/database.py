@@ -16,7 +16,7 @@ import os
 load_dotenv()
 
 # ── PostgreSQL Setup ───────────────────────────────────────────────────────────
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/astrashield")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/deepshield")
 
 # The engine is the connection to PostgreSQL
 engine = create_engine(DATABASE_URL)
@@ -47,7 +47,7 @@ def get_db():
 
 # ── MongoDB Setup ──────────────────────────────────────────────────────────────
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
-MONGO_DB = os.getenv("MONGO_DB", "astrashield")
+MONGO_DB = os.getenv("MONGO_DB", "deepshield")
 
 # MongoDB client (created once, reused everywhere)
 mongo_client = AsyncIOMotorClient(MONGO_URL)

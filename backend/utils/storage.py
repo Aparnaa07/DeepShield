@@ -21,7 +21,7 @@ minio_client = Minio(
     secure=os.getenv("MINIO_SECURE", "false").lower() == "true"
 )
 
-BUCKET_NAME = os.getenv("MINIO_BUCKET", "astrashield-uploads")
+BUCKET_NAME = os.getenv("MINIO_BUCKET", "deepshield-uploads")
 
 
 def ensure_bucket_exists():

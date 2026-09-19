@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: astrashield-backend
+    name: deepshield-backend
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
