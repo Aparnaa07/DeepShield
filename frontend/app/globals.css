@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-deep:       #09090b;
+  --bg-card:       #18181b;
+  --bg-card-hover: #27272a;
+  --border:        rgba(6, 182, 212, 0.2);
+  --border-bright: rgba(6, 182, 212, 0.5);
+  --cyan:          #06b6d4;
+  --cyan-bright:   #22d3ee;
+  --text-primary:  #f8fafc;
+  --text-muted:    #94a3b8;
+  --danger:        #ef4444;
+  --warning:       #f97316;
+  --caution:       #eab308;
+  --safe:          #10b981;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', sans-serif;
+  min-height: 100vh;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.2) 2px, rgba(0, 0, 0, 0.2) 4px);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-bright); }
+
+@layer components {
+  .card {
+    @apply bg-obsidian-900 border border-cyan-700/30 rounded-xl p-6 relative overflow-hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(6,182,212,0.1);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(6,182,212,0.3), transparent);
+  }
+  .card-hover {
+    @apply card transition-all duration-300 cursor-pointer;
+  }
+  .card-hover:hover {
+    @apply border-cyan-600/60;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.8), 0 0 24px rgba(6,182,212,0.15);
+    transform: translateY(-2px);
+  }
+  .btn-primary {
+    @apply px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-obsidian-950 font-body font-semibold rounded-md transition-all duration-200 flex items-center gap-2;
+    box-shadow: 0 0 20px rgba(6,182,212,0.3);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 30px rgba(6,182,212,0.5);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled {
+    @apply opacity-50 cursor-not-allowed bg-obsidian-700 text-obsidian-900;
+    transform: none;
+    box-shadow: none;
+  }
+  .text-glow {
+    color: var(--cyan-bright);
+    text-shadow: 0 0 10px rgba(6,182,212,0.8), 0 0 20px rgba(6,182,212,0.4);
+  }
+  .badge-low      { @apply px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-900/40 text-emerald-400 border border-emerald-700/40; }
+  .badge-medium   { @apply px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-900/40 text-amber-400 border border-amber-700/40; }
+  .badge-high     { @apply px-3 py-1 rounded-full text-xs font-mono font-bold bg-orange-900/40 text-orange-400 border border-orange-700/40; }
+  .badge-critical { @apply px-3 py-1 rounded-full text-xs font-mono font-bold bg-rose-900/40 text-rose-400 border border-rose-700/40; }
+  .section-label { @apply text-xs font-mono text-cyan-500 tracking-widest uppercase mb-2; }
+  .data-table { @apply w-full text-sm; }
+  .data-table th { @apply text-left text-xs font-mono text-cyan-500 uppercase tracking-wider pb-3 border-b border-cyan-900/40; }
+  .data-table td { @apply py-3 border-b border-obsidian-700/50 text-slate-300; }
+  .data-table tr:last-child td { @apply border-0; }
+}
+
+@layer utilities {
+  .font-display { font-family: 'Orbitron', sans-serif; }
+  .font-mono    { font-family: 'Space Mono', monospace; }
+  .font-body    { font-family: 'IBM Plex Sans', sans-serif; }
+  .bg-grid {
+    background-image: linear-gradient(rgba(6,182,212,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .glass {
+    background: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(6, 182, 212, 0.15);
+  }
+}
