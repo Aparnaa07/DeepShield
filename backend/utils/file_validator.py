@@ -1,4 +1,3 @@
-
 def validate_file(contents: bytes, filename: str) -> str:
     ext = filename.lower().split(".")[-1]
     ext_map = {

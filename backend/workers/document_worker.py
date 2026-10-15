@@ -1,7 +1,5 @@
 
-from celery_app import celery_app
 from database import jobs_collection, analysis_collection
-from utils.storage import download_from_minio
 from utils.ela import compute_ela
 from utils.metadata import analyze_metadata
 from scoring.ensemble import compute_final_score
@@ -10,7 +8,7 @@ import cv2
 import numpy as np
 import io
 import asyncio
-import fitz                              
+import fitz                              # PyMuPDF
 from PIL import Image
 from datetime import datetime
 
@@ -25,7 +23,6 @@ except ImportError:
 def pdf_to_image(pdf_bytes: bytes) -> bytes:
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
     page = doc[0]              
-                                      
     mat = fitz.Matrix(300/72, 300/72)
     pix = page.get_pixmap(matrix=mat)
     return pix.tobytes("png")
@@ -37,14 +34,12 @@ def analyze_noise_patterns(image_bytes: bytes) -> dict:
         if image is None:
             return {"score": 0.0, "flags": ["Could not decode image"]}
 
-                                                                          
         h, w = image.shape
         grid_size = 4            
         variances = []
 
         for i in range(grid_size):
             for j in range(grid_size):
-                                   
                 y1 = i * h // grid_size
                 y2 = (i + 1) * h // grid_size
                 x1 = j * w // grid_size
@@ -52,12 +47,9 @@ def analyze_noise_patterns(image_bytes: bytes) -> dict:
                 cell = image[y1:y2, x1:x2]
                 variances.append(float(np.var(cell)))
 
-                                                                     
         variance_of_variance = np.var(variances)
         mean_variance = np.mean(variances)
 
-                                
-                                                                      
         score = min(variance_of_variance / (mean_variance * 100 + 1e-8), 1.0)
 
         flags = []
@@ -77,21 +69,19 @@ def analyze_noise_patterns(image_bytes: bytes) -> dict:
 
 def extract_text_from_document(image_bytes: bytes) -> dict:
     if not OCR_AVAILABLE:
-        return {"text": "", "confidence": 0, "flags": ["OCR not available"]}
+        return {"text": "", "confidence": 0, "flags": ["OCR not available"], "score": 0.0}
 
     try:
         image = Image.open(io.BytesIO(image_bytes))
-                                                                    
         data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
 
-                                                
         words = []
         low_conf_words = []
         for i, word in enumerate(data["text"]):
             conf = data["conf"][i]
             if word.strip() and conf != -1:
                 words.append({"word": word, "confidence": conf})
-                if conf < 40:                                                   
+                if conf < 40:
                     low_conf_words.append(word)
 
         flags = []
@@ -102,7 +92,7 @@ def extract_text_from_document(image_bytes: bytes) -> dict:
         avg_confidence = np.mean([w["confidence"] for w in words]) if words else 0
 
         return {
-            "text": full_text[:500],                        
+            "text": full_text[:500],
             "word_count": len(words),
             "avg_confidence": round(float(avg_confidence), 1),
             "flags": flags,
@@ -112,40 +102,42 @@ def extract_text_from_document(image_bytes: bytes) -> dict:
         return {"text": "", "flags": [str(e)], "score": 0.0}
 
 
-@celery_app.task(bind=True, name="workers.document_worker.analyze_document")
-def analyze_document(self, job_id: str, storage_path: str):
-
-    def update_status(status: str, progress: int, step: str = None):
-        async def _update():
-            update = {"status": status, "progress": progress}
-            if step:
-                update[f"steps.{step}"] = "completed"
-            await jobs_collection.update_one({"job_id": job_id}, {"$set": update})
-        asyncio.run(_update())
-
+async def analyze_document(job_id: str, file_path: str):
+    """Analyze document (PDF/image) for forgery indicators."""
     try:
         start_time = datetime.utcnow()
-        update_status("processing", 10, "preprocessing")
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"status": "processing", "progress": 10, "steps.preprocessing": "completed"}}
+        )
 
-        file_bytes = download_from_minio(storage_path)
+        # Read file from local disk
+        with open(file_path, "rb") as f:
+            file_bytes = f.read()
 
-                                                          
-        is_pdf = storage_path.lower().endswith(".pdf")
+        is_pdf = file_path.lower().endswith(".pdf")
         image_bytes = pdf_to_image(file_bytes) if is_pdf else file_bytes
 
-        update_status("processing", 30)
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"progress": 30}}
+        )
 
-                                  
         ela_result = compute_ela(image_bytes)
-        update_status("processing", 50, "ai_analysis")
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"progress": 50, "steps.ai_analysis": "completed"}}
+        )
 
         noise_result = analyze_noise_patterns(image_bytes)
         ocr_result = extract_text_from_document(image_bytes)
         metadata_result = analyze_metadata(file_bytes)
 
-        update_status("processing", 75, "scoring")
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"progress": 75, "steps.scoring": "completed"}}
+        )
 
-                             
         module_scores = {
             "ela_analysis":   {"score": ela_result.get("score", 0), "weight": 0.35},
             "noise_patterns": {"score": noise_result.get("score", 0), "weight": 0.30},
@@ -155,7 +147,6 @@ def analyze_document(self, job_id: str, storage_path: str):
         final_result = compute_final_score(module_scores)
         processing_time = int((datetime.utcnow() - start_time).total_seconds() * 1000)
 
-                           
         all_flags = (
             ela_result.get("flags", []) +
             noise_result.get("flags", []) +
@@ -195,20 +186,15 @@ def analyze_document(self, job_id: str, storage_path: str):
             "processing_time_ms": processing_time,
         }
 
-        async def _save():
-            await analysis_collection.insert_one(report.copy())
-            await jobs_collection.update_one(
-                {"job_id": job_id},
-                {"$set": {"status": "completed", "progress": 100, "steps.report": "completed"}}
-            )
-        asyncio.run(_save())
-
-        return {"status": "completed", "job_id": job_id}
+        await analysis_collection.insert_one(report.copy())
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"status": "completed", "progress": 100, "steps.report": "completed"}}
+        )
 
     except Exception as e:
-        async def _fail():
-            await jobs_collection.update_one(
-                {"job_id": job_id}, {"$set": {"status": "failed", "error": str(e)}}
-            )
-        asyncio.run(_fail())
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"status": "failed", "error": str(e)}}
+        )
         raise

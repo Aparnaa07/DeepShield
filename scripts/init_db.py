@@ -1,4 +1,3 @@
-
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
@@ -13,13 +12,13 @@ def init():
     print("Creating PostgreSQL tables...")
     try:
         Base.metadata.create_all(bind=engine)
-        print("✅ Tables created successfully!")
-        print("   Tables: users, cases")
+        print("Tables created successfully!")
+        print("Tables: users, cases")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" Error: {e}")
         print("\nMake sure PostgreSQL is running and DATABASE_URL is set in backend/.env")
         print("If you don't have PostgreSQL installed, use Docker:")
-        print("  docker compose up postgres -d")
+        print("docker compose up postgres -d")
 
 if __name__ == "__main__":
     init()

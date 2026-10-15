@@ -1,14 +1,10 @@
-
 from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, Text
 from sqlalchemy.sql import func
 from database import Base
 import uuid
 
-
 def generate_uuid():
     return str(uuid.uuid4())
-
-
 class User(Base):
     __tablename__ = "users"
 

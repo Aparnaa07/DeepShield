@@ -1,17 +1,13 @@
-
 import exifread
 import io
 from datetime import datetime
-
-
-                                                           
+                                                         
 AI_SOFTWARE_SIGNATURES = [
     "stable diffusion", "midjourney", "dall-e", "dall·e",
     "generative", "ai generated", "artificial intelligence",
     "runway", "adobe firefly", "deepfake", "faceswap",
     "deepfaclab", "reface", "wombo"
 ]
-
 
 def extract_metadata(file_bytes: bytes) -> dict:
     try:
@@ -25,10 +21,7 @@ def extract_metadata(file_bytes: bytes) -> dict:
 def analyze_metadata(file_bytes: bytes) -> dict:
     metadata = extract_metadata(file_bytes)
     flags = []
-    suspicion_score = 0.0
-
-                                                                               
-                                                     
+    suspicion_score = 0.0                                    
                                               
     if not metadata:
         flags.append("No EXIF metadata found — typical of AI-generated images")

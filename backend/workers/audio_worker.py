@@ -1,7 +1,5 @@
 
-from celery_app import celery_app
 from database import jobs_collection, analysis_collection
-from utils.storage import download_from_minio
 from scoring.ensemble import compute_final_score
 
 import asyncio
@@ -9,26 +7,31 @@ import random
 from datetime import datetime
 
 
-@celery_app.task(bind=True, name="workers.audio_worker.analyze_audio")
-def analyze_audio(self, job_id: str, storage_path: str):
-    def update_status(status, progress, step=None):
-        async def _update():
-            update = {"status": status, "progress": progress}
-            if step:
-                update[f"steps.{step}"] = "completed"
-            await jobs_collection.update_one({"job_id": job_id}, {"$set": update})
-        asyncio.run(_update())
-
+async def analyze_audio(job_id: str, file_path: str):
+    """Analyze audio file for voice cloning / deepfake detection."""
     try:
         start_time = datetime.utcnow()
-        update_status("processing", 10, "preprocessing")
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"status": "processing", "progress": 10, "steps.preprocessing": "completed"}}
+        )
 
-        audio_bytes = download_from_minio(storage_path)
-        update_status("processing", 40, "ai_analysis")
+        # Read audio file from local disk
+        with open(file_path, "rb") as f:
+            audio_bytes = f.read()
 
-                         
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"progress": 40, "steps.ai_analysis": "completed"}}
+        )
+
+        # Demo mode: random score
         fake_prob = random.uniform(0.2, 0.9)
-        update_status("processing", 80, "scoring")
+
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"progress": 80, "steps.scoring": "completed"}}
+        )
 
         module_scores = {
             "voice_clone_detection": {"score": fake_prob, "weight": 1.0},
@@ -57,20 +60,15 @@ def analyze_audio(self, job_id: str, storage_path: str):
             "processing_time_ms": processing_time,
         }
 
-        async def _save():
-            await analysis_collection.insert_one(report.copy())
-            await jobs_collection.update_one(
-                {"job_id": job_id},
-                {"$set": {"status": "completed", "progress": 100, "steps.report": "completed"}}
-            )
-        asyncio.run(_save())
-
-        return {"status": "completed", "job_id": job_id}
+        await analysis_collection.insert_one(report.copy())
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"status": "completed", "progress": 100, "steps.report": "completed"}}
+        )
 
     except Exception as e:
-        async def _fail():
-            await jobs_collection.update_one(
-                {"job_id": job_id}, {"$set": {"status": "failed", "error": str(e)}}
-            )
-        asyncio.run(_fail())
+        await jobs_collection.update_one(
+            {"job_id": job_id},
+            {"$set": {"status": "failed", "error": str(e)}}
+        )
         raise
