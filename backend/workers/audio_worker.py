@@ -1,7 +1,3 @@
-"""
-workers/audio_worker.py — Audio analysis worker (deployment safe version)
-Runs in demo mode when PyTorch is not available.
-"""
 
 from celery_app import celery_app
 from database import jobs_collection, analysis_collection
@@ -30,7 +26,7 @@ def analyze_audio(self, job_id: str, storage_path: str):
         audio_bytes = download_from_minio(storage_path)
         update_status("processing", 40, "ai_analysis")
 
-        # Demo mode score
+                         
         fake_prob = random.uniform(0.2, 0.9)
         update_status("processing", 80, "scoring")
 

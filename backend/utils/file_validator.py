@@ -1,9 +1,5 @@
-"""
-utils/file_validator.py — Simple file validator without libmagic
-"""
 
 def validate_file(contents: bytes, filename: str) -> str:
-    """Detect file type from extension — simplified for deployment."""
     ext = filename.lower().split(".")[-1]
     ext_map = {
         "jpg":  "image/jpeg",

@@ -47,7 +47,7 @@ export default function Dashboard() {
       
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* Metric 1 */}
+        {}
         <div className="card-hover group">
           <div className="flex justify-between items-start mb-4">
             <div className="section-label group-hover:text-cyan-400 transition-colors">Total Analyses</div>
@@ -62,7 +62,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Metric 2 */}
+        {}
         <div className="card-hover group">
           <div className="flex justify-between items-start mb-4">
             <div className="section-label text-rose-500 group-hover:text-rose-400 transition-colors">Deepfakes Detected</div>
@@ -77,7 +77,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Metric 3 */}
+        {}
         <div className="card-hover group">
           <div className="flex justify-between items-start mb-4">
             <div className="section-label text-emerald-500 group-hover:text-emerald-400 transition-colors">System Health</div>
@@ -95,7 +95,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Main Chart */}
+        {}
         <motion.div variants={itemVariants} className="card lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
             <div className="section-label mb-0">Analysis Traffic Overview</div>
@@ -127,7 +127,7 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Recent Activity Mini-Feed */}
+        {}
         <motion.div variants={itemVariants} className="card">
           <div className="section-label mb-6">Recent Detections</div>
           <div className="space-y-4">

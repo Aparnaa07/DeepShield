@@ -1,10 +1,3 @@
-"""
-scripts/init_db.py — Creates all database tables and initial setup.
-
-Run this ONCE before starting the backend for the first time:
-  cd backend
-  python ../scripts/init_db.py
-"""
 
 import sys
 import os
@@ -14,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "backend", ".env"))
 
 from database import engine, Base
-import models  # Import models so SQLAlchemy knows about them
+import models                                                
 
 def init():
     print("Creating PostgreSQL tables...")

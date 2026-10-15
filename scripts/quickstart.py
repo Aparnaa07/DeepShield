@@ -1,13 +1,4 @@
-#!/usr/bin/env python3
-"""
-scripts/quickstart.py — One-script local development setup.
-
-This script checks your setup and gives you exactly the commands to run.
-It does NOT require Docker.
-
-Run from the project root:
-  python scripts/quickstart.py
-"""
+                      
 
 import subprocess
 import sys
@@ -15,7 +6,6 @@ import os
 
 
 def check(name: str, cmd: list, version_flag="--version") -> bool:
-    """Check if a command is available."""
     try:
         result = subprocess.run(cmd + [version_flag], capture_output=True, text=True, timeout=5)
         version = result.stdout.strip() or result.stderr.strip()

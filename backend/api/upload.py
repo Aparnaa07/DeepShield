@@ -1,6 +1,3 @@
-"""
-api/upload.py — File upload endpoint (deployment version, no PostgreSQL)
-"""
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
@@ -44,14 +41,14 @@ async def upload_file(
     file: UploadFile = File(...),
     notes: str = "",
 ):
-    # Read file
+               
     contents = await file.read()
 
-    # Check size
+                
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 50MB")
 
-    # Validate file type
+                        
     detected_mime = validate_file(contents, file.filename)
     if detected_mime not in ALLOWED_TYPES:
         raise HTTPException(
@@ -61,16 +58,16 @@ async def upload_file(
 
     media_type = ALLOWED_TYPES[detected_mime]
 
-    # Generate job ID
+                     
     job_id = f"ds_{str(uuid.uuid4())[:8]}"
 
-    # Save file locally
+                       
     os.makedirs(f"uploads/{job_id}", exist_ok=True)
     file_path = f"uploads/{job_id}/{file.filename}"
     with open(file_path, "wb") as f_out:
         f_out.write(contents)
 
-    # Create job status in MongoDB
+                                  
     await jobs_collection.insert_one({
         "job_id": job_id,
         "status": "queued",
@@ -85,7 +82,7 @@ async def upload_file(
         }
     })
 
-    # Run analysis using asyncio
+                                
     if media_type == "image":
         asyncio.create_task(analyze_image(job_id, file_path, detected_mime))
     elif media_type == "audio":

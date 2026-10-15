@@ -1,16 +1,8 @@
-"""
-scripts/generate_demo_data.py — Populates MongoDB with fake analysis results
-so you can see the dashboard working before training real AI models.
-
-Run this from the backend folder:
-  cd backend
-  python ../scripts/generate_demo_data.py
-"""
 
 import asyncio
 import random
 from datetime import datetime, timedelta
-# pyrefly: ignore [missing-import]
+                                  
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 import os
@@ -20,7 +12,7 @@ load_dotenv()
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 MONGO_DB  = os.getenv("MONGO_DB",  "deepshield")
 
-# Realistic fake filenames for demo
+                                   
 IMAGE_NAMES    = ["face_photo.jpg", "profile_pic.png", "id_scan.jpg", "passport.png", "headshot.webp"]
 AUDIO_NAMES    = ["voice_message.mp3", "phone_call.wav", "ceo_audio.m4a", "interview.wav"]
 DOCUMENT_NAMES = ["passport_scan.pdf", "aadhaar_card.pdf", "drivers_license.pdf", "pan_card.pdf"]
@@ -34,7 +26,6 @@ RECOMMENDATIONS = {
 
 
 def random_score_for_category(category: str) -> int:
-    """Return a realistic score for each risk category."""
     ranges = {"LOW": (5, 29), "MEDIUM": (31, 59), "HIGH": (62, 84), "CRITICAL": (87, 99)}
     lo, hi = ranges[category]
     return random.randint(lo, hi)
@@ -146,13 +137,13 @@ async def main():
     analyses = db["analyses"]
     jobs     = db["jobs"]
 
-    # Clear existing demo data
+                              
     await analyses.delete_many({})
     await jobs.delete_many({})
     print("Cleared existing data...")
 
-    # Generate 30 demo analyses spread over the last 7 days
-    categories = ["LOW", "LOW", "LOW", "MEDIUM", "MEDIUM", "HIGH", "CRITICAL"]  # Weighted distribution
+                                                           
+    categories = ["LOW", "LOW", "LOW", "MEDIUM", "MEDIUM", "HIGH", "CRITICAL"]                         
     file_types = ["image", "image", "audio", "document"]
 
     for i in range(30):
@@ -161,7 +152,7 @@ async def main():
         score     = random_score_for_category(category)
         job_id    = f"demo_{i+1:03d}_{random.randint(1000, 9999)}"
 
-        # Spread timestamps over the last 7 days
+                                                
         ts_dt = datetime.utcnow() - timedelta(
             days=random.randint(0, 6),
             hours=random.randint(0, 23),
@@ -169,7 +160,7 @@ async def main():
         )
         ts = ts_dt.isoformat()
 
-        # Build appropriate report
+                                  
         if file_type == "image":
             report = make_image_report(job_id, score, category, ts)
         elif file_type == "audio":
@@ -179,7 +170,7 @@ async def main():
 
         await analyses.insert_one(report)
 
-        # Create matching job record
+                                    
         await jobs.insert_one({
             "job_id": job_id,
             "status": "completed",

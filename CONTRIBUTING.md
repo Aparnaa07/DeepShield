@@ -17,6 +17,3 @@ Thank you for your interest in contributing!
 - Fix bugs
 - Improve UI/UX
 - Add tests
-
-## Contact
-GitHub: https://github.com/Rohankumar2201

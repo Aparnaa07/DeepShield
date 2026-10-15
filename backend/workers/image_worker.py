@@ -1,6 +1,3 @@
-"""
-workers/image_worker.py — Image analysis worker (sync version for threading)
-"""
 
 from database import jobs_collection, analysis_collection
 from utils.metadata import analyze_metadata
@@ -19,7 +16,7 @@ async def analyze_image(job_id: str, file_path: str, mime_type: str):
             {"$set": {"status": "processing", "progress": 10, "steps.preprocessing": "completed"}}
         )
 
-        # Read the file
+                       
         with open(file_path, "rb") as f:
             image_bytes = f.read()
 
@@ -28,7 +25,7 @@ async def analyze_image(job_id: str, file_path: str, mime_type: str):
             {"$set": {"progress": 40, "steps.ai_analysis": "completed"}}
         )
 
-        # Run analysis
+                      
         ela_result = compute_ela(image_bytes)
         metadata_result = analyze_metadata(image_bytes)
         image_score = random.uniform(0.3, 0.95)
