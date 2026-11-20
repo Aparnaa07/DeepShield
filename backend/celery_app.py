@@ -12,7 +12,6 @@ celery_app = Celery(
         "workers.image_worker",                                      
         "workers.audio_worker",                                   
         "workers.document_worker",                                     
-        "workers.scoring_worker",                                         
     ]
 )
 

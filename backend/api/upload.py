@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
@@ -41,14 +40,11 @@ async def upload_file(
     file: UploadFile = File(...),
     notes: str = "",
 ):
-               
     contents = await file.read()
 
-                
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 50MB")
 
-                        
     detected_mime = validate_file(contents, file.filename)
     if detected_mime not in ALLOWED_TYPES:
         raise HTTPException(
@@ -57,19 +53,18 @@ async def upload_file(
         )
 
     media_type = ALLOWED_TYPES[detected_mime]
-
-                     
     job_id = f"ds_{str(uuid.uuid4())[:8]}"
 
-                       
-    os.makedirs(f"uploads/{job_id}", exist_ok=True)
-    file_path = f"uploads/{job_id}/{file.filename}"
+    upload_dir = os.path.join("uploads", job_id)
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, file.filename)
     with open(file_path, "wb") as f_out:
         f_out.write(contents)
 
-                                  
     await jobs_collection.insert_one({
         "job_id": job_id,
+        "filename": file.filename,
+        "file_type": media_type,
         "status": "queued",
         "created_at": datetime.utcnow().isoformat(),
         "progress": 0,
@@ -82,13 +77,12 @@ async def upload_file(
         }
     })
 
-                                
     if media_type == "image":
-        asyncio.create_task(analyze_image(job_id, file_path, detected_mime))
+        asyncio.create_task(analyze_image(job_id, file_path, detected_mime, filename=file.filename))
     elif media_type == "audio":
-        asyncio.create_task(analyze_audio(job_id, file_path))
+        asyncio.create_task(analyze_audio(job_id, file_path, filename=file.filename))
     elif media_type == "document":
-        asyncio.create_task(analyze_document(job_id, file_path))
+        asyncio.create_task(analyze_document(job_id, file_path, filename=file.filename))
 
     return UploadResponse(
         job_id=job_id,

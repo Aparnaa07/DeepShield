@@ -28,21 +28,6 @@ async def list_reports(
     }
 
 
-@router.get("/{job_id}")
-async def get_report(job_id: str):
-    result = await analysis_collection.find_one({"job_id": job_id}, {"_id": 0})
-    if not result:
-        raise HTTPException(status_code=404, detail="Report not found")
-    return result
-
-
-@router.delete("/{job_id}")
-async def delete_report(job_id: str):
-    await analysis_collection.delete_one({"job_id": job_id})
-    await jobs_collection.delete_one({"job_id": job_id})
-    return {"message": "Report deleted"}
-
-
 @router.get("/stats/summary")
 async def get_stats():
     total = await analysis_collection.count_documents({})
@@ -61,3 +46,19 @@ async def get_stats():
         },
         "threat_rate": round((critical + high) / total * 100, 1) if total > 0 else 0
     }
+
+
+@router.get("/{job_id}")
+async def get_report(job_id: str):
+    result = await analysis_collection.find_one({"job_id": job_id}, {"_id": 0})
+    if not result:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return result
+
+
+@router.delete("/{job_id}")
+async def delete_report(job_id: str):
+    await analysis_collection.delete_one({"job_id": job_id})
+    await jobs_collection.delete_one({"job_id": job_id})
+    return {"message": "Report deleted"}
+
